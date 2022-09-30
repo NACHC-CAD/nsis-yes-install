@@ -36,7 +36,7 @@
 !define JAVA_VERSION "C:\_YES\tools\java\jdk-11.0.11\bin"
 
 # path additions/modifications
-!define JAVA_PATH "C:\_YES\tools\java\jdk-11.0.11\bin;"
+!define JAVA_PATH "%JAVA_VERSION%;"
 !define GIT_PATH "C:\_YES\tools\git\Git-2.27.0\bin;"
 !define MVN_PATH "C:\_YES\tools\mvn\apache-maven-3.6.3\bin;"
 
@@ -76,17 +76,62 @@ Section
 	# modifications to path env variable
 	#
 
+	# set env to current user
+    DetailPrint ""
+    DetailPrint "Settin env to Current User..."
+    EnVar::SetHKCU
+
+	#
+	# java
+	#
+
     # remove ${JAVA_PATH} from path
     DetailPrint ""
     DetailPrint "Removing existing instance of $JAVA_PATH from Path"
-    EnVar::DeleteValue "Path" "$JAVA_PATH"
+    EnVar::DeleteValue "Path" "${JAVA_PATH}"
     Pop $0
     DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
     
     # add our ${JAVA_PATH} to the path env variable
     DetailPrint ""
-    DetailPrint "Adding our ${JAVA_VERSION} to the path env variable..."
-    EnVar::AddValue "Path" "${JAVA_VERSION}"
+    DetailPrint "Adding ${JAVA_PATH} to the path env variable..."
+    EnVar::AddValue "Path" "${JAVA_PATH}"
+    Pop $0
+    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
+    
+	#
+	# git
+	#
+
+    # remove ${GIT_PATH} from path
+    DetailPrint ""
+    DetailPrint "Removing existing instance of $GIT_PATH from Path"
+    EnVar::DeleteValue "Path" "${GIT_PATH}"
+    Pop $0
+    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
+    
+    # add our ${GIT_PATH} to the path env variable
+    DetailPrint ""
+    DetailPrint "Adding ${GIT_PATH} to the path env variable..."
+    EnVar::AddValue "Path" "${GIT_PATH}"
+    Pop $0
+    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
+    
+	#
+	# mvn
+	#
+
+    # remove ${MVN_PATH} from path
+    DetailPrint ""
+    DetailPrint "Removing existing instance of $MVN_PATH from Path"
+    EnVar::DeleteValue "Path" "${MVN_PATH}"
+    Pop $0
+    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
+    
+    # add our ${MVN_PATH} to the path env variable
+    DetailPrint ""
+    DetailPrint "Adding ${MVN_PATH} to the path env variable..."
+    EnVar::AddValue "Path" "${MVN_PATH}"
     Pop $0
     DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
     
@@ -117,13 +162,15 @@ Section
 #    Pop $0
 #    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
 #
-#    #
-#    # done
-#    #
-#    
-#    DetailPrint ""
-#    DetailPrint "Done."
-#
+    #
+    # done
+    #
+    
+    DetailPrint ""
+    DetailPrint "Done."
+    DetailPrint ""
+    DetailPrint ""
+
 #    # copy files
 #    DetailPrint ""
 #    DetailPrint "Copying files to $InstDir..."
