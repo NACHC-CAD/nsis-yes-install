@@ -27,9 +27,18 @@
 !include WriteEnvStr.nsh
 
 
+#
 # defines
+#
+
+# env variables
 !define JAVA_HOME "C:\_YES\tools\java\jdk-11.0.11"
 !define JAVA_VERSION "C:\_YES\tools\java\jdk-11.0.11\bin"
+
+# path additions/modifications
+!define JAVA_PATH "C:\_YES\tools\java\jdk-11.0.11\bin;"
+!define GIT_PATH "C:\_YES\tools\git\Git-2.27.0\bin;"
+!define MVN_PATH "C:\_YES\tools\mvn\apache-maven-3.6.3\bin;"
 
 
 # definitions
@@ -39,7 +48,10 @@ InstallDir "C:\_YES"
 Page Directory
 Page InstFiles
 
-# section to copy files and manipulate env variable
+#
+# Main section
+#
+
 Section
 
     #
@@ -59,6 +71,25 @@ Section
 	Push JAVA_VERSION
 	Push '${JAVA_VERSION}'
 	Call WriteEnvStr
+
+	#
+	# modifications to path env variable
+	#
+
+    # remove ${JAVA_PATH} from path
+    DetailPrint ""
+    DetailPrint "Removing existing instance of $JAVA_PATH from Path"
+    EnVar::DeleteValue "Path" "$JAVA_PATH"
+    Pop $0
+    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
+    
+    # add our ${JAVA_PATH} to the path env variable
+    DetailPrint ""
+    DetailPrint "Adding our ${JAVA_VERSION} to the path env variable..."
+    EnVar::AddValue "Path" "${JAVA_VERSION}"
+    Pop $0
+    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
+    
 
 
 #	# Create the variable.  
