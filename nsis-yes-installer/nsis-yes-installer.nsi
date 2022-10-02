@@ -23,9 +23,10 @@
 # 
 # ---
 
+
 # includes
 !include WriteEnvStr.nsh
-
+!include PrependEnv.nsh
 
 #
 # defines
@@ -36,10 +37,9 @@
 !define JAVA_VERSION "C:\_YES\tools\java\jdk-11.0.11\bin"
 
 # path additions/modifications
-!define JAVA_PATH "%JAVA_VERSION%;"
+!define JAVA_PATH "%JAVA_VERSION%"
 !define GIT_PATH "C:\_YES\tools\git\Git-2.27.0\bin;"
 !define MVN_PATH "C:\_YES\tools\mvn\apache-maven-3.6.3\bin;"
-
 
 # definitions
 Outfile "YesEclipseEnvironmentInstaller.exe"
@@ -48,104 +48,142 @@ InstallDir "C:\_YES"
 Page Directory
 Page InstFiles
 
+ShowInstDetails show
+
 #
 # Main section
 #
 
 Section
 
-    #
-    # create environment variables
-    #
-
-	# JAVA_HOME
-    DetailPrint ""
-    DetailPrint "Updating JAVA_HOME Environment Variable (this takes a few seconds)..."
-	Push JAVA_HOME
-	Push '${JAVA_HOME}'
-	Call WriteEnvStr
+	IfFileExists "$InstDir\*.*" file_found file_not_found
+	file_not_found:
 	
-	# JAVA_VERSION
-    DetailPrint ""
-    DetailPrint "Updating JAVA_VERSION Environment Variable (this takes a few seconds)..."
-	Push JAVA_VERSION
-	Push '${JAVA_VERSION}'
-	Call WriteEnvStr
+	    #
+	    # create environment variables
+	    #
+	
+		# JAVA_HOME
+	    DetailPrint ""
+	    DetailPrint "Updating JAVA_HOME Environment Variable (this takes a few seconds)..."
+		Push JAVA_HOME
+		Push '${JAVA_HOME}'
+		Call WriteEnvStr
+		
+		# JAVA_VERSION
+	    DetailPrint ""
+	    DetailPrint "Updating JAVA_VERSION Environment Variable (this takes a few seconds)..."
+		Push JAVA_VERSION
+		Push '${JAVA_VERSION}'
+		Call WriteEnvStr
+	
+		#
+		# modifications to path env variable
+		#
+	
+		# set env to current user
+	    DetailPrint ""
+	    DetailPrint "Settin env to Current User..."
+	    EnVar::SetHKCU
+	
+		#
+		# mvn
+		#
+	
+	    # remove ${MVN_PATH} from path
+	    DetailPrint ""
+	    DetailPrint "Removing existing instance of $MVN_PATH from Path"
+	    EnVar::DeleteValue "Path" "${MVN_PATH}"
+	    Pop $0
+	    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
+	    
+	    # prepend our ${MVN_PATH} to the path env variable
+		DetailPrint ""
+		DetailPrint "Prepending ${MVN_PATH}"
+		Push ${HKEY_CURRENT_USER}
+		Push "Environment"
+		Push "Path"
+		Push ";"
+		Push "${MVN_PATH}"
+		Call RegPrependString
+		Pop $0
+		DetailPrint "RegPrependString:Error=$0 (Should be 0)"
+	
+		#
+		# git
+		#
+	
+	    # remove ${GIT_PATH} from path
+	    DetailPrint ""
+	    DetailPrint "Removing existing instance of $GIT_PATH from Path"
+	    EnVar::DeleteValue "Path" "${GIT_PATH}"
+	    Pop $0
+	    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
+	    
+	    # prepend our ${GIT_PATH} to the path env variable
+		DetailPrint ""
+		DetailPrint "Prepending ${GIT_PATH}"
+		Push ${HKEY_CURRENT_USER}
+		Push "Environment"
+		Push "Path"
+		Push ";"
+		Push "${GIT_PATH}"
+		Call RegPrependString
+		Pop $0
+		DetailPrint "RegPrependString:Error=$0 (Should be 0)"
+	
+		#
+		# java
+		#
+	
+	    # remove ${JAVA_PATH} from path
+	    DetailPrint ""
+	    DetailPrint "Removing existing instance of $JAVA_PATH from Path"
+	    EnVar::DeleteValue "Path" "${JAVA_PATH}"
+	    Pop $0
+	    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
+	    
+	    # prepend our ${JAVA_PATH} to the path env variable
+		DetailPrint ""
+		DetailPrint "Prepending ${JAVA_PATH}"
+		Push ${HKEY_CURRENT_USER}
+		Push "Environment"
+		Push "Path"
+		Push ";"
+		Push "${JAVA_PATH}"
+		Call RegPrependString
+		Pop $0
+		DetailPrint "RegPrependString:Error=$0 (Should be 0)"
+	
+		#
+		# copy files
+		#
+			
+	#    DetailPrint ""
+	#    DetailPrint "Copying files to $InstDir..."
+	#    DetailPrint ""
+	#    SetOutPath "$InstDir"
+	#    File /a /r "C:\_YES"
+	
+	    DetailPrint ""		
+	    DetailPrint "Creating logical link..."
+		${If} $InstDir != "C:\_YES"
+			DetailPrint "Logical link created as C:_YES."
+		${Else}
+		    DetailPrint "Installed to default location (logical link not needed)."		
+		${EndIf}
 
-	#
-	# modifications to path env variable
-	#
+	goto end_of_script
+	file_found:
+		DetailPrint ""
+		DetailPrint "---------------------------------------"
+		DetailPrint "INSTALL DIRECTORY EXISTS: "
+		DetailPrint "$InstDir"
+		DetailPrint "PLEASE DELETE EXISTING TARGET DIRECTORY BEFORE INSTALLING"
+		DetailPrint "INSTALLATION WAS NOT EXECUTED"
+		DetailPrint "---------------------------------------"
 
-	# set env to current user
-    DetailPrint ""
-    DetailPrint "Settin env to Current User..."
-    EnVar::SetHKCU
-
-	#
-	# java
-	#
-
-    # remove ${JAVA_PATH} from path
-    DetailPrint ""
-    DetailPrint "Removing existing instance of $JAVA_PATH from Path"
-    EnVar::DeleteValue "Path" "${JAVA_PATH}"
-    Pop $0
-    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
-    
-    # add our ${JAVA_PATH} to the path env variable
-    DetailPrint ""
-    DetailPrint "Adding ${JAVA_PATH} to the path env variable..."
-    EnVar::AddValue "Path" "${JAVA_PATH}"
-    Pop $0
-    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
-    
-	#
-	# git
-	#
-
-    # remove ${GIT_PATH} from path
-    DetailPrint ""
-    DetailPrint "Removing existing instance of $GIT_PATH from Path"
-    EnVar::DeleteValue "Path" "${GIT_PATH}"
-    Pop $0
-    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
-    
-    # add our ${GIT_PATH} to the path env variable
-    DetailPrint ""
-    DetailPrint "Adding ${GIT_PATH} to the path env variable..."
-    EnVar::AddValue "Path" "${GIT_PATH}"
-    Pop $0
-    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
-    
-	#
-	# mvn
-	#
-
-    # remove ${MVN_PATH} from path
-    DetailPrint ""
-    DetailPrint "Removing existing instance of $MVN_PATH from Path"
-    EnVar::DeleteValue "Path" "${MVN_PATH}"
-    Pop $0
-    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
-    
-    # add our ${MVN_PATH} to the path env variable
-    DetailPrint ""
-    DetailPrint "Adding ${MVN_PATH} to the path env variable..."
-    EnVar::AddValue "Path" "${MVN_PATH}"
-    Pop $0
-    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
-
-
-	#
-    # copy files
-    #
-    
-    DetailPrint ""
-    DetailPrint "Copying files to $InstDir..."
-    DetailPrint ""
-    SetOutPath "$InstDir"
-    File /a /r "C:\_YES"
-
+	end_of_script:
 
     #
     # done
@@ -154,7 +192,6 @@ Section
     DetailPrint ""
     DetailPrint "Done."
     DetailPrint ""
-    DetailPrint ""
-
 
 SectionEnd
+
