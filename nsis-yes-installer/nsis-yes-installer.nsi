@@ -59,9 +59,9 @@ Section
 	IfFileExists "$InstDir\*.*" file_found file_not_found
 	file_not_found:
 	
-	    #
-	    # create environment variables
-	    #
+		#
+		# create environment variables
+		#
 	
 		# JAVA_HOME
 	    DetailPrint ""
@@ -90,14 +90,14 @@ Section
 		# mvn
 		#
 	
-	    # remove ${MVN_PATH} from path
-	    DetailPrint ""
-	    DetailPrint "Removing existing instance of $MVN_PATH from Path"
-	    EnVar::DeleteValue "Path" "${MVN_PATH}"
-	    Pop $0
-	    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
-	    
-	    # prepend our ${MVN_PATH} to the path env variable
+		# remove ${MVN_PATH} from path
+		DetailPrint ""
+		DetailPrint "Removing existing instance of $MVN_PATH from Path"
+		EnVar::DeleteValue "Path" "${MVN_PATH}"
+		Pop $0
+		DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
+
+		# prepend our ${MVN_PATH} to the path env variable
 		DetailPrint ""
 		DetailPrint "Prepending ${MVN_PATH}"
 		Push ${HKEY_CURRENT_USER}
@@ -113,14 +113,14 @@ Section
 		# git
 		#
 	
-	    # remove ${GIT_PATH} from path
-	    DetailPrint ""
-	    DetailPrint "Removing existing instance of $GIT_PATH from Path"
-	    EnVar::DeleteValue "Path" "${GIT_PATH}"
-	    Pop $0
-	    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
-	    
-	    # prepend our ${GIT_PATH} to the path env variable
+		# remove ${GIT_PATH} from path
+		DetailPrint ""
+		DetailPrint "Removing existing instance of $GIT_PATH from Path"
+		EnVar::DeleteValue "Path" "${GIT_PATH}"
+		Pop $0
+		DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
+
+		# prepend our ${GIT_PATH} to the path env variable
 		DetailPrint ""
 		DetailPrint "Prepending ${GIT_PATH}"
 		Push ${HKEY_CURRENT_USER}
@@ -136,14 +136,14 @@ Section
 		# java
 		#
 	
-	    # remove ${JAVA_PATH} from path
-	    DetailPrint ""
-	    DetailPrint "Removing existing instance of $JAVA_PATH from Path"
-	    EnVar::DeleteValue "Path" "${JAVA_PATH}"
-	    Pop $0
-	    DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
-	    
-	    # prepend our ${JAVA_PATH} to the path env variable
+		# remove ${JAVA_PATH} from path
+		DetailPrint ""
+		DetailPrint "Removing existing instance of $JAVA_PATH from Path"
+		EnVar::DeleteValue "Path" "${JAVA_PATH}"
+		Pop $0
+		DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
+
+		# prepend our ${JAVA_PATH} to the path env variable
 		DetailPrint ""
 		DetailPrint "Prepending ${JAVA_PATH}"
 		Push ${HKEY_CURRENT_USER}
@@ -159,16 +159,32 @@ Section
 		# copy files
 		#
 			
-	#    DetailPrint ""
-	#    DetailPrint "Copying files to $InstDir..."
-	#    DetailPrint ""
-	#    SetOutPath "$InstDir"
-	#    File /a /r "C:\_YES"
+		DetailPrint ""
+		DetailPrint "Copying files to $InstDir..."
+		DetailPrint ""
+		SetOutPath "$InstDir"
+		File /a /r "C:\_YES_SRC\"
 	
-	    DetailPrint ""		
-	    DetailPrint "Creating logical link..."
+		#
+		# configure git to use the installed certificate
+		#
+
+		DetailPrint ""		
+		DetailPrint "Creating logical link..."
+		
+		#
+		# create a logical link if the default was not selected
+		#
+
+		Exec '$InstDir\tools\git\Git-2.27.0\bin\git config --system http.sslcainfo "C:\_YES\tools\git\Git-2.27.0\mingw64\ssl\certs\ca-bundle.crt"'
+	
+		DetailPrint ""		
+		DetailPrint "Creating logical link..."
 		${If} $InstDir != "C:\_YES"
-			DetailPrint "Logical link created as C:_YES."
+			DetailPrint "Creating logical link as C:_YES."
+			Exec 'mklink /D C:\_YES $InstDir'
+			Pop $0
+			DetailPrint "RegPrependString:Error=$0 (Should be 0)"
 		${Else}
 		    DetailPrint "Installed to default location (logical link not needed)."		
 		${EndIf}
