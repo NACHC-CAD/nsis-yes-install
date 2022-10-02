@@ -170,18 +170,17 @@ Section
 		#
 
 		DetailPrint ""		
-		DetailPrint "Creating logical link..."
-		
+		DetailPrint "Configuring git certificate..."
+		Exec '$InstDir\tools\git\Git-2.27.0\bin\git config --system http.sslcainfo "C:\_YES\tools\git\Git-2.27.0\mingw64\ssl\certs\ca-bundle.crt"'
+	
 		#
 		# create a logical link if the default was not selected
 		#
 
-		Exec '$InstDir\tools\git\Git-2.27.0\bin\git config --system http.sslcainfo "C:\_YES\tools\git\Git-2.27.0\mingw64\ssl\certs\ca-bundle.crt"'
-	
 		DetailPrint ""		
 		DetailPrint "Creating logical link..."
 		${If} $InstDir != "C:\_YES"
-			DetailPrint "Creating logical link as C:_YES."
+			DetailPrint "Creating logical link as C:\_YES."
 			Exec 'mklink /D C:\_YES $InstDir'
 			Pop $0
 			DetailPrint "RegPrependString:Error=$0 (Should be 0)"
