@@ -50,6 +50,7 @@ Page InstFiles
 
 ShowInstDetails show
 
+
 #
 # Main section
 #
@@ -59,6 +60,16 @@ Section
 	IfFileExists "$InstDir\*.*" file_found file_not_found
 	file_not_found:
 	
+		#
+		# copy files
+		#
+			
+		DetailPrint ""
+		DetailPrint "Copying files to $InstDir..."
+		DetailPrint ""
+		SetOutPath "$InstDir"
+		File /a /r "C:\_YES_SRC\_YES\"
+
 		#
 		# create environment variables
 		#
@@ -156,22 +167,16 @@ Section
 		DetailPrint "RegPrependString:Error=$0 (Should be 0)"
 	
 		#
-		# copy files
-		#
-			
-		DetailPrint ""
-		DetailPrint "Copying files to $InstDir..."
-		DetailPrint ""
-		SetOutPath "$InstDir"
-		File /a /r "C:\_YES_SRC\"
-	
-		#
 		# configure git to use the installed certificate
 		#
 
 		DetailPrint ""		
 		DetailPrint "Configuring git certificate..."
-		Exec '$InstDir\tools\git\Git-2.27.0\bin\git config --system http.sslcainfo "C:\_YES\tools\git\Git-2.27.0\mingw64\ssl\certs\ca-bundle.crt"'
+		Exec '$InstDir\tools\git\Git-2.27.0\bin\git.exe config --system http.sslcainfo "C:\_YES\tools\git\Git-2.27.0\mingw64\ssl\certs\ca-bundle.crt"'
+		Pop $0
+		Pop $1
+		DetailPrint "RegPrependString:Error=$0 (Should be 0)"
+		DetailPrint "$1"
 	
 		#
 		# create a logical link if the default was not selected
@@ -181,9 +186,11 @@ Section
 		DetailPrint "Creating logical link..."
 		${If} $InstDir != "C:\_YES"
 			DetailPrint "Creating logical link as C:\_YES."
-			Exec 'mklink /D C:\_YES $InstDir'
+			nsExec::ExecToStack 'cmd.exe /C mklink /D C:\_YES $InstDir'
 			Pop $0
+			Pop $1
 			DetailPrint "RegPrependString:Error=$0 (Should be 0)"
+			DetailPrint "$1"
 		${Else}
 		    DetailPrint "Installed to default location (logical link not needed)."		
 		${EndIf}
