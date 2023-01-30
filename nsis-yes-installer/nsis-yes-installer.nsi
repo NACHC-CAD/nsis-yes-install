@@ -40,6 +40,7 @@
 !define JAVA_PATH "%JAVA_VERSION%"
 !define GIT_PATH "C:\_YES\tools\git\Git-2.27.0\bin;"
 !define MVN_PATH "C:\_YES\tools\mvn\apache-maven-3.6.3\bin;"
+!define BAT_PATH "C:\_YES\tools\bat"
 
 # definitions
 Outfile "YesEclipseEnvironmentInstaller.exe"
@@ -93,17 +94,40 @@ Section
 		#
 	
 		# set env to current user
-	    DetailPrint ""
-	    DetailPrint "Settin env to Current User..."
-	    EnVar::SetHKCU
+	  DetailPrint ""
+	  DetailPrint "Settin env to Current User..."
+	  EnVar::SetHKCU
 	
+		#
+		# bat
+		#
+	
+		# remove ${BAT_PATH} from path
+		DetailPrint ""
+		DetailPrint "Removing existing instance of BAT_PATH from Path"
+		EnVar::DeleteValue "Path" "${BAT_PATH}"
+		Pop $0
+		DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
+
+		# prepend our ${BAT_PATH} to the path env variable
+		DetailPrint ""
+		DetailPrint "Prepending ${BAT_PATH}"
+		Push ${HKEY_CURRENT_USER}
+		Push "Environment"
+		Push "Path"
+		Push ";"
+		Push "${BAT_PATH}"
+		Call RegPrependString
+		Pop $0
+		DetailPrint "RegPrependString:Error=$0 (Should be 0)"
+		
 		#
 		# mvn
 		#
 	
 		# remove ${MVN_PATH} from path
 		DetailPrint ""
-		DetailPrint "Removing existing instance of $MVN_PATH from Path"
+		DetailPrint "Removing existing instance of MVN_PATH from Path"
 		EnVar::DeleteValue "Path" "${MVN_PATH}"
 		Pop $0
 		DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
@@ -126,7 +150,7 @@ Section
 	
 		# remove ${GIT_PATH} from path
 		DetailPrint ""
-		DetailPrint "Removing existing instance of $GIT_PATH from Path"
+		DetailPrint "Removing existing instance of GIT_PATH from Path"
 		EnVar::DeleteValue "Path" "${GIT_PATH}"
 		Pop $0
 		DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
@@ -149,7 +173,7 @@ Section
 	
 		# remove ${JAVA_PATH} from path
 		DetailPrint ""
-		DetailPrint "Removing existing instance of $JAVA_PATH from Path"
+		DetailPrint "Removing existing instance of JAVA_PATH from Path"
 		EnVar::DeleteValue "Path" "${JAVA_PATH}"
 		Pop $0
 		DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
@@ -178,6 +202,19 @@ Section
 		DetailPrint "RegPrependString:Error=$0 (Should be 0)"
 		DetailPrint "$1"
 	
+		#
+		# run jv 8 (this is required for some EC2 Windows servers)
+		#
+
+		DetailPrint ""		
+		DetailPrint "Setting default JVM..."
+		Exec '$InstDir\tools\bat\jv.bat 8'
+		Pop $0
+		Pop $1
+		DetailPrint "RegPrependString:Error=$0 (Should be 0)"
+		DetailPrint "Done setting default JVM."
+		DetailPrint "$1"
+
 		#
 		# create a logical link if the default was not selected
 		#
