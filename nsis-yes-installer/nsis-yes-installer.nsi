@@ -40,7 +40,8 @@
 !define JAVA_PATH "%JAVA_VERSION%"
 !define GIT_PATH "C:\_YES\tools\git\Git-2.27.0\bin;"
 !define MVN_PATH "C:\_YES\tools\mvn\apache-maven-3.6.3\bin;"
-!define BAT_PATH "C:\_YES\tools\bat"
+!define BAT_PATH "C:\_YES\tools\bat;"
+!define R_PATH "C:\_YES\tools\r\R\R-4.2.2\bin;"
 
 # definitions
 Outfile "YesEclipseEnvironmentInstaller.exe"
@@ -94,10 +95,33 @@ Section
 		#
 	
 		# set env to current user
-	  DetailPrint ""
-	  DetailPrint "Settin env to Current User..."
-	  EnVar::SetHKCU
+		DetailPrint ""
+		DetailPrint "Settin env to Current User..."
+		EnVar::SetHKCU
 	
+		#
+		# r
+		#
+	
+		# remove ${R_PATH} from path
+		DetailPrint ""
+		DetailPrint "Removing existing instance of R_PATH from Path"
+		EnVar::DeleteValue "Path" "${R_PATH}"
+		Pop $0
+		DetailPrint "EnVar::Check returned=|$0| (should be 0)"  
+
+		# prepend our ${R_PATH} to the path env variable
+		DetailPrint ""
+		DetailPrint "Prepending ${R_PATH}"
+		Push ${HKEY_CURRENT_USER}
+		Push "Environment"
+		Push "Path"
+		Push ";"
+		Push "${R_PATH}"
+		Call RegPrependString
+		Pop $0
+		DetailPrint "RegPrependString:Error=$0 (Should be 0)"
+		
 		#
 		# bat
 		#
